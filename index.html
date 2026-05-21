@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código Hamming (7,4) - Simulador Interactivo</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+    <div class="contenedor-principal">
+
+        <!-- PANEL DE TEORÍA -->
+        <aside class="panel-teoria">
+            <div class="tarjeta-teoria">
+                <h2 class="titulo-teoria">¿Qué es el Código Hamming?</h2>
+                <p>El <strong>Código Hamming</strong> es un esquema de corrección de errores desarrollado por <strong>Richard Hamming</strong> en 1950.</p>
+
+                <div class="concepto">
+                    <h3>El Código (7,4)</h3>
+                    <p>Codifica <strong>4 bits de datos</strong> en una <strong>palabra de 7 bits</strong>, añadiendo 3 bits de paridad que permiten <em>detectar y corregir</em> errores de 1 bit.</p>
+                </div>
+
+                <div class="concepto">
+                    <h3>Posiciones de los Bits</h3>
+                    <div class="tabla-posiciones">
+                        <div class="celda-pos paridad-bit">P1<span>pos 1</span></div>
+                        <div class="celda-pos paridad-bit">P2<span>pos 2</span></div>
+                        <div class="celda-pos dato-bit">D1<span>pos 3</span></div>
+                        <div class="celda-pos paridad-bit">P4<span>pos 4</span></div>
+                        <div class="celda-pos dato-bit">D2<span>pos 5</span></div>
+                        <div class="celda-pos dato-bit">D3<span>pos 6</span></div>
+                        <div class="celda-pos dato-bit">D4<span>pos 7</span></div>
+                    </div>
+                    <p class="nota-pos"><span class="badge-paridad">P</span> Paridad &nbsp; <span class="badge-dato">D</span> Dato</p>
+                </div>
+
+                <div class="concepto">
+                    <h3>¿Para qué sirve?</h3>
+                    <ul>
+                        <li>Memorias RAM con ECC</li>
+                        <li>Transmisión de datos confiable</li>
+                        <li>Almacenamiento en discos duros</li>
+                        <li>Comunicaciones satelitales</li>
+                    </ul>
+                </div>
+
+                <div class="concepto">
+                    <h3>Fórmulas de Paridad</h3>
+                    <code class="formula">P1 = D1 ⊕ D2 ⊕ D4</code>
+                    <code class="formula">P2 = D1 ⊕ D3 ⊕ D4</code>
+                    <code class="formula">P4 = D2 ⊕ D3 ⊕ D4</code>
+                </div>
+            </div>
+        </aside>
+
+        <!-- PANEL PRINCIPAL DEL SIMULADOR -->
+        <main class="panel-simulador">
+            <header class="encabezado-simulador">
+                <h1>Simulador de Código Hamming <span class="badge-version">(7,4)</span></h1>
+                <p class="subtitulo">Aprende paso a paso cómo funciona la codificación y corrección de errores</p>
+                <div class="creditos-autoras">
+                    Desarrollado por <span class="nombre-autora">Manuela Maiguel</span> &amp; <span class="nombre-autora">Maileth Vallejo</span>
+                </div>
+            </header>
+
+            <!-- PASO 0: ENTRADA DE DATOS -->
+            <section class="seccion-paso" id="seccion-entrada">
+                <div class="numero-paso">01</div>
+                <h2 class="titulo-paso">Ingresa los 4 Bits de Datos</h2>
+
+                <div class="contenedor-entrada-bits">
+                    <div class="grupo-bit-entrada">
+                        <label class="etiqueta-bit">D1</label>
+                        <input type="number" id="entrada-d1" class="campo-bit" min="0" max="1" value="1" maxlength="1">
+                    </div>
+                    <div class="grupo-bit-entrada">
+                        <label class="etiqueta-bit">D2</label>
+                        <input type="number" id="entrada-d2" class="campo-bit" min="0" max="1" value="0" maxlength="1">
+                    </div>
+                    <div class="grupo-bit-entrada">
+                        <label class="etiqueta-bit">D3</label>
+                        <input type="number" id="entrada-d3" class="campo-bit" min="0" max="1" value="1" maxlength="1">
+                    </div>
+                    <div class="grupo-bit-entrada">
+                        <label class="etiqueta-bit">D4</label>
+                        <input type="number" id="entrada-d4" class="campo-bit" min="0" max="1" value="1" maxlength="1">
+                    </div>
+                </div>
+
+                <div class="contenedor-botones">
+                    <button class="boton-primario" id="boton-iniciar" onclick="iniciarCodificacion()">
+                        Iniciar Codificación
+                    </button>
+                    <button class="boton-secundario" id="boton-reiniciar" onclick="reiniciarSimulacion()" style="display:none;">
+                        Reiniciar
+                    </button>
+                </div>
+
+                <div id="mensaje-error-entrada" class="mensaje-error" style="display:none;"></div>
+            </section>
+
+            <!-- PASO 1: CÁLCULO DE PARIDAD -->
+            <section class="seccion-paso oculto" id="seccion-calculo-paridad">
+                <div class="numero-paso">02</div>
+                <h2 class="titulo-paso">Cálculo de Bits de Paridad</h2>
+
+                <div id="contenedor-pasos-paridad">
+                    <!-- Los pasos se generan dinámicamente -->
+                </div>
+
+                <div class="contenedor-botones" id="contenedor-boton-siguiente">
+                    <button class="boton-primario" id="boton-siguiente-paso" onclick="mostrarSiguientePaso()">
+                        Siguiente Paso →
+                    </button>
+                </div>
+            </section>
+
+            <!-- PASO 2: PALABRA CÓDIGO COMPLETA -->
+            <section class="seccion-paso oculto" id="seccion-palabra-codigo">
+                <div class="numero-paso">03</div>
+                <h2 class="titulo-paso">Palabra Código Completa (7 bits)</h2>
+
+                <div id="contenedor-palabra-codigo">
+                    <!-- La palabra código se muestra dinámicamente -->
+                </div>
+
+                <div class="contenedor-botones">
+                    <button class="boton-peligro" id="boton-simular-error" onclick="simularErrorAleatorio()">
+                        Simular Error Aleatorio
+                    </button>
+                </div>
+            </section>
+
+            <!-- PASO 3: DETECCIÓN DE ERROR -->
+            <section class="seccion-paso oculto" id="seccion-deteccion">
+                <div class="numero-paso">04</div>
+                <h2 class="titulo-paso">Detección del Error - Cálculo del Síndrome</h2>
+
+                <div id="contenedor-deteccion">
+                    <!-- El síndrome se muestra dinámicamente -->
+                </div>
+
+                <div class="contenedor-botones">
+                    <button class="boton-primario" id="boton-corregir" onclick="corregirError()">
+                        Corregir Error →
+                    </button>
+                </div>
+            </section>
+
+            <!-- PASO 4: CORRECCIÓN Y RECUPERACIÓN -->
+            <section class="seccion-paso oculto" id="seccion-correccion">
+                <div class="numero-paso">05</div>
+                <h2 class="titulo-paso">Corrección y Mensaje Recuperado</h2>
+
+                <div id="contenedor-correccion">
+                    <!-- La corrección se muestra dinámicamente -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="hamming.js"></script>
+</body>
+</html>
