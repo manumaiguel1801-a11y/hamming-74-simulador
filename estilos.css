@@ -858,3 +858,728 @@ body {
     .campo-bit { width: 52px; height: 52px; font-size: 22px; }
     .valor-bit { width: 40px; height: 40px; font-size: 18px; }
 }
+
+/* ===== SECCIÓN VISUAL: SIMULACIÓN CON CELULARES ===== */
+
+.seccion-visual {
+    background: var(--azul-panel);
+    border: 1px solid var(--azul-borde);
+    border-radius: 16px;
+    padding: 28px 32px;
+    box-shadow: var(--sombra-card);
+    position: relative;
+    overflow: hidden;
+}
+
+.seccion-visual::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--verde-exito), var(--cyan-principal));
+}
+
+/* Encabezado */
+.visual-encabezado { margin-bottom: 20px; }
+
+.visual-titulo {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--blanco);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.visual-titulo::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 22px;
+    background: var(--verde-exito);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.visual-subtitulo {
+    font-size: 13px;
+    color: var(--gris-claro);
+    margin-left: 14px;
+}
+
+/* Controles: input + botones */
+.visual-controles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.visual-campo-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.visual-label {
+    font-size: 12px;
+    color: var(--gris-claro);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.visual-campo-texto {
+    height: 48px;
+    width: 160px;
+    background: var(--azul-medio);
+    border: 2px solid var(--azul-borde);
+    border-radius: 10px;
+    color: var(--blanco);
+    font-size: 22px;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 4px;
+    outline: none;
+    transition: var(--transicion);
+    text-transform: uppercase;
+}
+
+.visual-campo-texto:focus {
+    border-color: var(--cyan-principal);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+    background: var(--azul-panel);
+}
+
+.visual-botones { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Botones de transmisión */
+.boton-sin-proteccion,
+.boton-con-hamming,
+.boton-limpiar-chat {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transicion);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.boton-sin-proteccion {
+    background: linear-gradient(135deg, #c62828, #e53935);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255, 23, 68, 0.3);
+}
+
+.boton-sin-proteccion:hover {
+    background: linear-gradient(135deg, #e53935, #ff1744);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 23, 68, 0.5);
+}
+
+.boton-con-hamming {
+    background: linear-gradient(135deg, #1b5e20, #2e7d32);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 230, 118, 0.25);
+}
+
+.boton-con-hamming:hover {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 230, 118, 0.4);
+}
+
+.boton-limpiar-chat {
+    background: transparent;
+    color: var(--gris-claro);
+    border: 1px solid var(--azul-borde);
+    font-size: 12px;
+    padding: 8px 14px;
+}
+
+.boton-limpiar-chat:hover {
+    border-color: var(--gris-claro);
+    color: var(--blanco);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.boton-sin-proteccion:disabled,
+.boton-con-hamming:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.visual-error {
+    background: rgba(255, 23, 68, 0.1);
+    border: 1px solid var(--rojo-error);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: #ff6b6b;
+    font-size: 13px;
+    width: 100%;
+}
+
+/* Escenario: dos celulares + canal */
+.escenario-transmision {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.celular-contenedor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.celular-etiqueta {
+    font-size: 13px;
+    color: var(--gris-claro);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Cuerpo del celular (dibujado en CSS) */
+.celular-cuerpo {
+    width: 148px;
+    height: 272px;
+    background: #0e1520;
+    border-radius: 26px;
+    border: 3px solid #2a4060;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 1px rgba(0, 212, 255, 0.08),
+        inset 0 0 12px rgba(0, 0, 0, 0.6),
+        0 16px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Brillo lateral sutil */
+.celular-cuerpo::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 20%;
+    width: 2px;
+    height: 40%;
+    background: linear-gradient(transparent, rgba(255, 255, 255, 0.15), transparent);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* Notch */
+.celular-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 52px;
+    height: 16px;
+    background: #060a10;
+    border-radius: 0 0 12px 12px;
+    z-index: 10;
+}
+
+/* Cámara dentro del notch */
+.celular-notch::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 5px;
+    width: 6px;
+    height: 6px;
+    background: #1a2a3a;
+    border-radius: 50%;
+    border: 1px solid #2a3a4a;
+}
+
+/* Barra de estado */
+.celular-barra-estado {
+    height: 26px;
+    padding: 0 12px;
+    padding-top: 6px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    background: #0a1018;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.55);
+    flex-shrink: 0;
+}
+
+.estado-iconos { display: flex; gap: 4px; }
+.icono-estado { font-size: 7px; color: rgba(255, 255, 255, 0.4); }
+
+/* Cabecera del chat (estilo WhatsApp) */
+.celular-cabecera-chat {
+    height: 32px;
+    background: #112240;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 8px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--azul-borde);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--cyan-suave);
+}
+
+.chat-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan-oscuro), var(--cyan-suave));
+    flex-shrink: 0;
+}
+
+/* Área de chat (pantalla del celular) */
+.celular-pantalla {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 6px 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: #090d14;
+    scrollbar-width: none;
+}
+
+.celular-pantalla::-webkit-scrollbar { display: none; }
+
+/* Barra home inferior */
+.celular-barra-inferior {
+    height: 18px;
+    background: #0a1018;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.linea-home {
+    width: 52px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+}
+
+/* ===== BURBUJAS DE CHAT ===== */
+
+.burbuja-chat {
+    max-width: 90%;
+    padding: 5px 9px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    line-height: 1.4;
+    border: 1.5px solid;
+    animation: aparecerBurbuja 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    word-break: break-all;
+}
+
+.burbuja-saliente {
+    align-self: flex-end;
+    background: rgba(0, 168, 204, 0.18);
+    border-color: var(--cyan-suave);
+    color: var(--cyan-principal);
+    border-bottom-right-radius: 3px;
+}
+
+.burbuja-entrante {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: var(--blanco);
+    border-bottom-left-radius: 3px;
+}
+
+.burbuja-corrompida {
+    border-color: var(--rojo-error) !important;
+    background: rgba(255, 23, 68, 0.15) !important;
+    color: var(--rojo-error) !important;
+}
+
+.burbuja-corregida {
+    border-color: var(--verde-exito) !important;
+    background: rgba(0, 230, 118, 0.12) !important;
+    color: var(--verde-exito) !important;
+}
+
+.burbuja-info {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0;
+    opacity: 0.75;
+    margin-top: 3px;
+}
+
+@keyframes aparecerBurbuja {
+    from { opacity: 0; transform: translateY(8px) scale(0.93); }
+    to   { opacity: 1; transform: translateY(0)  scale(1); }
+}
+
+/* ===== CANAL DE TRANSMISIÓN (ONDAS WIFI) ===== */
+
+.canal-transmision {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 88px;
+    position: relative;
+}
+
+.canal-titulo {
+    font-size: 10px;
+    color: var(--gris-claro);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.ondas-contenedor {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Punto central */
+.ondas-contenedor::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan-principal);
+    z-index: 2;
+    transition: background 0.3s;
+}
+
+.ondas-contenedor.ondas-error::before   { background: var(--rojo-error); }
+.ondas-contenedor.ondas-hamming::before { background: var(--verde-exito); }
+
+.onda-wifi {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--cyan-principal);
+    opacity: 0;
+    animation: expandirOnda 2s ease-out infinite;
+}
+
+.onda-wifi:nth-child(1) { width: 18px; height: 18px; animation-delay: 0s; }
+.onda-wifi:nth-child(2) { width: 36px; height: 36px; animation-delay: 0.55s; }
+.onda-wifi:nth-child(3) { width: 54px; height: 54px; animation-delay: 1.1s; }
+
+@keyframes expandirOnda {
+    0%   { opacity: 0.9; transform: scale(0.2); }
+    100% { opacity: 0;   transform: scale(1); }
+}
+
+.ondas-contenedor.ondas-error   .onda-wifi { border-color: var(--rojo-error); }
+.ondas-contenedor.ondas-hamming .onda-wifi { border-color: var(--verde-exito); }
+
+/* Temblor de interferencia */
+.canal-transmision.interferencia-activa {
+    animation: temblarCanal 0.08s linear infinite;
+}
+
+@keyframes temblarCanal {
+    0%,  100% { transform: translateX(0); }
+    25%        { transform: translateX(-3px) rotate(-1deg); }
+    75%        { transform: translateX(3px)  rotate(1deg); }
+}
+
+/* Ícono central del canal */
+.canal-icono {
+    font-size: 22px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s;
+}
+
+/* ===== RESPONSIVE SIMULACIÓN VISUAL ===== */
+
+@media (max-width: 700px) {
+    .seccion-visual { padding: 20px 16px; }
+    .escenario-transmision { gap: 10px; }
+    .celular-cuerpo { width: 120px; height: 220px; }
+    .burbuja-chat { font-size: 10px; letter-spacing: 1px; }
+    .canal-transmision { min-width: 60px; }
+    .ondas-contenedor { width: 48px; height: 48px; }
+    .onda-wifi:nth-child(3) { width: 44px; height: 44px; }
+    .visual-campo-texto { width: 130px; }
+    .visual-controles { gap: 10px; }
+}
+
+/* ===== PANELES DE INFORMACIÓN BINARIA ===== */
+
+.panel-info-transmision {
+    width: 155px;
+    height: 272px;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid var(--azul-borde);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Estado vacío (antes de transmitir) */
+.panel-info-vacio {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.panel-vacio-icono {
+    font-size: 26px;
+    opacity: 0.25;
+    display: block;
+}
+
+.panel-vacio-texto {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.2);
+    line-height: 1.5;
+}
+
+/* Cabecera del panel */
+.panel-info-titulo {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--cyan-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--azul-borde);
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+/* Área scrollable del contenido */
+.panel-info-scroll {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    scrollbar-width: none;
+}
+
+.panel-info-scroll::-webkit-scrollbar { display: none; }
+
+.panel-subtitulo {
+    font-size: 9px;
+    color: var(--gris-claro);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 4px 0 2px;
+    opacity: 0.8;
+}
+
+/* Fila de bit: letra → binario */
+.bit-fila {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    line-height: 1.6;
+}
+
+.bit-letra {
+    width: 11px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--cyan-suave);
+    flex-shrink: 0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.bit-flecha {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.bit-bytes {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+/* Bits individuales dentro de .bit-bytes */
+.bit-bytes .b1  { color: var(--blanco); }
+.bit-bytes .b0  { color: rgba(255, 255, 255, 0.3); }
+.bit-bytes .err { color: var(--rojo-error); font-weight: 900; text-decoration: underline; }
+.bit-bytes .fix { color: var(--verde-exito); font-weight: 900; }
+
+.panel-separador {
+    height: 1px;
+    background: var(--azul-borde);
+    margin: 5px 0;
+    flex-shrink: 0;
+}
+
+/* Etiquetas de estado al pie del panel */
+.panel-estado {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 7px;
+    border-radius: 6px;
+    line-height: 1.4;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.panel-estado.peligro {
+    color: #ff6b6b;
+    background: rgba(255, 23, 68, 0.1);
+    border: 1px solid rgba(255, 23, 68, 0.3);
+}
+
+.panel-estado.ok {
+    color: var(--verde-exito);
+    background: rgba(0, 230, 118, 0.08);
+    border: 1px solid rgba(0, 230, 118, 0.28);
+}
+
+.panel-estado.advertencia {
+    color: var(--amarillo-advertencia);
+    background: rgba(255, 171, 0, 0.08);
+    border: 1px solid rgba(255, 171, 0, 0.28);
+}
+
+/* Ocultar paneles en pantallas pequeñas */
+@media (max-width: 760px) {
+    .panel-info-transmision { display: none; }
+}
+
+/* ===== TABLAS DE BITS EN LOS PANELES ===== */
+
+/* Número grande centrado */
+.panel-numero-grande {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--cyan-principal);
+    text-align: center;
+    line-height: 1.2;
+    margin: 4px 0;
+    font-family: 'Courier New', monospace;
+}
+
+/* Tabla de etiquetas + valores de bits */
+.bit-tabla {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 2px 0;
+}
+
+.bit-tabla-fila {
+    display: flex;
+    gap: 2px;
+    justify-content: flex-start;
+}
+
+/* Fila de etiquetas (D1 D2 / P1 P2 …) */
+.bit-tabla-fila.etq span {
+    width: 18px;
+    text-align: center;
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Fila de valores */
+.bit-tabla-fila:not(.etq) span {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 900;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Clases de color por tipo de bit */
+.bit-tabla-fila .b1  { color: var(--blanco); background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); }
+.bit-tabla-fila .b0  { color: rgba(255,255,255,0.3); background: transparent; }
+.bit-tabla-fila .err { color: var(--rojo-error); background: rgba(255,23,68,0.2); border-color: var(--rojo-error) !important; font-weight: 900; }
+.bit-tabla-fila .fix { color: var(--verde-exito); background: rgba(0,230,118,0.15); border-color: var(--verde-exito) !important; font-weight: 900; }
+.bit-tabla-fila .bt-p { color: var(--naranja-paridad); background: rgba(255,109,0,0.15); border-color: rgba(255,109,0,0.4) !important; }
+.bit-tabla-fila .bt-d { color: var(--cyan-principal); background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.3) !important; }
+
+/* Nota de error (debajo de la tabla) */
+.panel-nota-error {
+    font-size: 9px;
+    color: var(--rojo-error);
+    font-weight: 700;
+    margin-top: 1px;
+    letter-spacing: 0.3px;
+}
+
+/* Línea clave: valor */
+.panel-linea {
+    font-size: 10px;
+    color: var(--gris-claro);
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.panel-linea .v-ok  { color: var(--verde-exito); font-weight: 700; font-family: 'Courier New', monospace; }
+.panel-linea .v-err { color: var(--rojo-error);  font-weight: 700; font-family: 'Courier New', monospace; }
+
+/* Síndrome mini */
+.panel-sindrome-mini {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--blanco);
+    letter-spacing: 3px;
+    padding: 3px 0;
+}
+
+.panel-sindrome-mini .v-err {
+    color: var(--rojo-error);
+    letter-spacing: 0;
+    font-size: 11px;
+}
+
+/* Ocultar spinners del input numérico visual */
+#entrada-numero-visual::-webkit-outer-spin-button,
+#entrada-numero-visual::-webkit-inner-spin-button { -webkit-appearance: none; }
+#entrada-numero-visual { -moz-appearance: textfield; }

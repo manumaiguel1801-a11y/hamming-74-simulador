@@ -16,6 +16,14 @@ const estadoSimulacion = {
 };
 
 // =====================================================================
+//  ESTADO DE LA SIMULACIÓN VISUAL
+// =====================================================================
+
+const estadoChat = {
+    transmitiendo: false,
+};
+
+// =====================================================================
 //  FUNCIONES DE LÓGICA DEL CÓDIGO HAMMING
 // =====================================================================
 
@@ -575,6 +583,293 @@ function mostrarSeccion(idSeccion) {
 }
 
 // =====================================================================
+//  SIMULACIÓN VISUAL — CELULARES
+// =====================================================================
+
+function obtenerNumeroValidado() {
+    const campo = document.getElementById('entrada-numero-visual');
+    const divError = document.getElementById('visual-mensaje-error');
+    const valor = parseInt(campo.value);
+
+    if (isNaN(valor) || valor < 1 || valor > 7) {
+        divError.textContent = 'Escribe un número entero del 1 al 7.';
+        divError.style.display = 'block';
+        return null;
+    }
+    divError.style.display = 'none';
+    return valor;
+}
+
+function numeroA4Bits(n) {
+    // 5 → [0, 1, 0, 1]
+    return n.toString(2).padStart(4, '0').split('').map(Number);
+}
+
+function introducirErrorBit(bits) {
+    const pos = Math.floor(Math.random() * bits.length);
+    const resultado = [...bits];
+    resultado[pos] = resultado[pos] === 0 ? 1 : 0;
+    return { bitsConError: resultado, posicion: pos + 1 };
+}
+
+function renderBits(bits, posResaltada, clsResaltado) {
+    // posResaltada: 1-indexed; clsResaltado: 'err' | 'fix'
+    return bits.map((b, i) =>
+        `<span class="${posResaltada === i + 1 ? clsResaltado : (b === 1 ? 'b1' : 'b0')}">${b}</span>`
+    ).join('');
+}
+
+function agregarBurbujaEmisora(texto) {
+    const pantalla = document.getElementById('chat-emisor');
+    const div = document.createElement('div');
+    div.className = 'burbuja-chat burbuja-saliente';
+    div.textContent = texto;
+    pantalla.appendChild(div);
+    pantalla.scrollTop = pantalla.scrollHeight;
+}
+
+function agregarBurbujaReceptora(texto, estado, info) {
+    const pantalla = document.getElementById('chat-receptor');
+    const div = document.createElement('div');
+    div.className = 'burbuja-chat burbuja-entrante';
+
+    if (estado === 'corrompido') {
+        div.classList.add('burbuja-corrompida');
+        div.innerHTML = `❌ ${texto}<span class="burbuja-info">Mensaje corrompido</span>`;
+    } else if (estado === 'corregido') {
+        div.classList.add('burbuja-corregida');
+        div.innerHTML = `✓ ${texto}<span class="burbuja-info">Error detectado y corregido en posición ${info}</span>`;
+    } else {
+        div.textContent = texto;
+    }
+
+    pantalla.appendChild(div);
+    pantalla.scrollTop = pantalla.scrollHeight;
+}
+
+function activarOndas(modo) {
+    const contenedor = document.getElementById('ondas-contenedor');
+    contenedor.classList.remove('ondas-error', 'ondas-hamming');
+    if (modo === 'error')   contenedor.classList.add('ondas-error');
+    if (modo === 'hamming') contenedor.classList.add('ondas-hamming');
+}
+
+function mostrarIconoCanal(icono) {
+    document.getElementById('canal-icono').textContent = icono;
+}
+
+function activarInterferencia(activa) {
+    const canal = document.getElementById('canal-transmision');
+    if (activa) canal.classList.add('interferencia-activa');
+    else        canal.classList.remove('interferencia-activa');
+}
+
+function bloquearBotonesVisual(bloqueado) {
+    document.querySelector('.boton-sin-proteccion').disabled = bloqueado;
+    document.querySelector('.boton-con-hamming').disabled    = bloqueado;
+    estadoChat.transmitiendo = bloqueado;
+}
+
+// ----- Paneles de información binaria -----
+
+function mostrarPanelEmisor(numero, bits4, modo, palabraCodigo) {
+    const panel = document.getElementById('panel-emisor-info');
+
+    const etqDatos = ['D1','D2','D3','D4'];
+    const tablaDatos = `<div class="bit-tabla">
+        <div class="bit-tabla-fila etq">${etqDatos.map(e => `<span>${e}</span>`).join('')}</div>
+        <div class="bit-tabla-fila">${bits4.map(b => `<span class="${b ? 'b1' : 'b0'}">${b}</span>`).join('')}</div>
+    </div>`;
+
+    let bloqueHamming = '';
+    if (modo === 'hamming' && palabraCodigo) {
+        const etq7     = ['P1','P2','D1','P4','D2','D3','D4'];
+        const tiposPos = ['p','p','d','p','d','d','d'];
+        bloqueHamming = `
+            <div class="panel-separador"></div>
+            <div class="panel-subtitulo">Codificado → 7 bits:</div>
+            <div class="bit-tabla">
+                <div class="bit-tabla-fila etq">${etq7.map(e => `<span>${e}</span>`).join('')}</div>
+                <div class="bit-tabla-fila">${palabraCodigo.map((b, i) =>
+                    `<span class="bt-${tiposPos[i]}">${b}</span>`).join('')}
+                </div>
+            </div>`;
+    }
+
+    const estadoHtml = modo === 'hamming'
+        ? `<div class="panel-estado ok">🛡️ Paridad calculada y añadida.</div>`
+        : `<div class="panel-estado advertencia">⚠️ Sin bits de verificación.</div>`;
+
+    panel.innerHTML = `
+        <div class="panel-info-titulo">📤 Enviando</div>
+        <div class="panel-info-scroll">
+            <div class="panel-subtitulo">Número → 4 bits de datos</div>
+            <div class="panel-numero-grande">${numero}</div>
+            ${tablaDatos}
+            ${bloqueHamming}
+            <div class="panel-separador"></div>
+            ${estadoHtml}
+        </div>`;
+}
+
+function mostrarPanelReceptor(bits4orig, bitsRecibidos, posErrorBit, modo, sindrome, posErrorHamming, palabraCorregida) {
+    const panel = document.getElementById('panel-receptor-info');
+
+    if (modo === 'corrompido') {
+        const etqDatos = ['D1','D2','D3','D4'];
+        const tablaBits = `<div class="bit-tabla">
+            <div class="bit-tabla-fila etq">${etqDatos.map(e => `<span>${e}</span>`).join('')}</div>
+            <div class="bit-tabla-fila">${renderBits(bitsRecibidos, posErrorBit, 'err')}</div>
+        </div>`;
+        const numOrig   = parseInt(bits4orig.join(''), 2);
+        const numRecib  = parseInt(bitsRecibidos.join(''), 2);
+
+        panel.innerHTML = `
+            <div class="panel-info-titulo">📥 Recibido</div>
+            <div class="panel-info-scroll">
+                <div class="panel-subtitulo">4 bits llegados:</div>
+                ${tablaBits}
+                <div class="panel-nota-error">bit ${posErrorBit} alterado ↑</div>
+                <div class="panel-separador"></div>
+                <div class="panel-linea">Esperado: <span class="v-ok">${bits4orig.join('')} = ${numOrig}</span></div>
+                <div class="panel-linea">Recibido: <span class="v-err">${bitsRecibidos.join('')} = ${numRecib}</span></div>
+                <div class="panel-separador"></div>
+                <div class="panel-estado peligro">❌ Error no detectado.</div>
+            </div>`;
+
+    } else {
+        const etq7 = ['P1','P2','D1','P4','D2','D3','D4'];
+        const tablaRecibida = `<div class="bit-tabla">
+            <div class="bit-tabla-fila etq">${etq7.map(e => `<span>${e}</span>`).join('')}</div>
+            <div class="bit-tabla-fila">${renderBits(bitsRecibidos, posErrorBit, 'err')}</div>
+        </div>`;
+        const tablaCorregida = `<div class="bit-tabla">
+            <div class="bit-tabla-fila etq">${etq7.map(e => `<span>${e}</span>`).join('')}</div>
+            <div class="bit-tabla-fila">${renderBits(palabraCorregida, posErrorBit, 'fix')}</div>
+        </div>`;
+        const [s1, s2, s4]  = sindrome;
+        const numRecuperado  = parseInt(bits4orig.join(''), 2);
+
+        panel.innerHTML = `
+            <div class="panel-info-titulo">📥 Recibido</div>
+            <div class="panel-info-scroll">
+                <div class="panel-subtitulo">7 bits recibidos:</div>
+                ${tablaRecibida}
+                <div class="panel-separador"></div>
+                <div class="panel-subtitulo">Síndrome S4·S2·S1:</div>
+                <div class="panel-sindrome-mini">${s4}&nbsp;${s2}&nbsp;${s1} <span class="v-err">→ pos&nbsp;${posErrorHamming}</span></div>
+                <div class="panel-separador"></div>
+                <div class="panel-subtitulo">Bit corregido:</div>
+                ${tablaCorregida}
+                <div class="panel-linea">Datos: <span class="v-ok">${bits4orig.join('')} = ${numRecuperado}</span></div>
+                <div class="panel-separador"></div>
+                <div class="panel-estado ok">✓ Mensaje íntegro.</div>
+            </div>`;
+    }
+}
+
+function resetearPaneles() {
+    document.getElementById('panel-emisor-info').innerHTML =
+        `<div class="panel-info-vacio">
+            <span class="panel-vacio-icono">📤</span>
+            <span class="panel-vacio-texto">Envía un mensaje para ver el proceso de codificación</span>
+        </div>`;
+    document.getElementById('panel-receptor-info').innerHTML =
+        `<div class="panel-info-vacio">
+            <span class="panel-vacio-icono">📥</span>
+            <span class="panel-vacio-texto">Aquí verás el resultado al recibir el mensaje</span>
+        </div>`;
+}
+
+// ----- Flujos de transmisión -----
+
+function transmitirSinProteccion() {
+    if (estadoChat.transmitiendo) return;
+    const numero = obtenerNumeroValidado();
+    if (numero === null) return;
+
+    const bits4 = numeroA4Bits(numero);
+
+    bloquearBotonesVisual(true);
+    agregarBurbujaEmisora(`${numero}  →  ${bits4.join('')}`);
+    mostrarPanelEmisor(numero, bits4, 'sin-proteccion', null);
+    activarOndas('normal');
+    mostrarIconoCanal('');
+
+    setTimeout(() => {
+        activarOndas('error');
+        activarInterferencia(true);
+        mostrarIconoCanal('⚡');
+    }, 700);
+
+    setTimeout(() => {
+        activarInterferencia(false);
+        mostrarIconoCanal('');
+        activarOndas('normal');
+
+        const { bitsConError, posicion } = introducirErrorBit(bits4);
+        const numRecibido = parseInt(bitsConError.join(''), 2);
+        agregarBurbujaReceptora(`${bitsConError.join('')}  →  ${numRecibido}`, 'corrompido', posicion);
+        mostrarPanelReceptor(bits4, bitsConError, posicion, 'corrompido', null, null, null);
+
+        bloquearBotonesVisual(false);
+    }, 1700);
+}
+
+function transmitirConHamming() {
+    if (estadoChat.transmitiendo) return;
+    const numero = obtenerNumeroValidado();
+    if (numero === null) return;
+
+    const bits4        = numeroA4Bits(numero);
+    const bitsParidad  = calcularBitsDeParidad(bits4);
+    const palabraCodigo = construirPalabraCodigo(bits4, bitsParidad);
+
+    bloquearBotonesVisual(true);
+    agregarBurbujaEmisora(`🛡️ ${numero}  →  ${palabraCodigo.join('')}`);
+    mostrarPanelEmisor(numero, bits4, 'hamming', palabraCodigo);
+    activarOndas('hamming');
+    mostrarIconoCanal('🛡️');
+
+    setTimeout(() => {
+        activarInterferencia(true);
+        mostrarIconoCanal('⚡');
+    }, 700);
+
+    setTimeout(() => {
+        activarInterferencia(false);
+        mostrarIconoCanal('🛡️');
+        activarOndas('hamming');
+    }, 1200);
+
+    setTimeout(() => {
+        mostrarIconoCanal('');
+        activarOndas('normal');
+
+        const { bitsConError, posicion } = introducirErrorBit(palabraCodigo);
+        const sindrome      = calcularSindrome(bitsConError);
+        const posError      = detectarError(sindrome);
+        const palabraCorregida = corregirBit(bitsConError, posError);
+        const bitsRecuperados  = extraerBitsDeDatos(palabraCorregida);
+
+        agregarBurbujaReceptora(`${bitsRecuperados.join('')}  →  ${numero}`, 'corregido', posError);
+        mostrarPanelReceptor(bits4, bitsConError, posicion, 'corregido', sindrome, posError, palabraCorregida);
+
+        bloquearBotonesVisual(false);
+    }, 1900);
+}
+
+function limpiarChatVisual() {
+    document.getElementById('chat-emisor').innerHTML  = '';
+    document.getElementById('chat-receptor').innerHTML = '';
+    mostrarIconoCanal('');
+    activarOndas('normal');
+    activarInterferencia(false);
+    document.getElementById('visual-mensaje-error').style.display = 'none';
+    resetearPaneles();
+}
+
+// =====================================================================
 //  INICIALIZACIÓN Y VALIDACIÓN DE ENTRADA EN TIEMPO REAL
 // =====================================================================
 
@@ -605,5 +900,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const campoNumero = document.getElementById('entrada-numero-visual');
+    if (!campoNumero) return;
+
+    campoNumero.addEventListener('input', () => {
+        const v = parseInt(campoNumero.value);
+        if (isNaN(v)) { campoNumero.value = ''; return; }
+        if (v < 1) campoNumero.value = '1';
+        if (v > 7) campoNumero.value = '7';
+    });
+
+    campoNumero.addEventListener('keydown', evento => {
+        if (evento.key === 'Enter') transmitirConHamming();
     });
 });

@@ -65,6 +65,107 @@
                 </div>
             </header>
 
+            <!-- SECCIÓN VISUAL: SIMULACIÓN CON CELULARES -->
+            <section class="seccion-visual" id="seccion-visual">
+
+                <div class="visual-encabezado">
+                    <h2 class="visual-titulo">¿Por qué necesitamos proteger los datos?</h2>
+                    <p class="visual-subtitulo">Observa cómo el ruido en el canal puede corromper un mensaje</p>
+                </div>
+
+                <!-- CONTROLES DE ENTRADA -->
+                <div class="visual-controles">
+                    <div class="visual-campo-grupo">
+                        <label class="visual-label" for="entrada-numero-visual">Escribe un número del 1 al 7</label>
+                        <input type="number" id="entrada-numero-visual" class="visual-campo-texto"
+                               min="1" max="7" placeholder="5" autocomplete="off">
+                    </div>
+                    <div class="visual-botones">
+                        <button class="boton-sin-proteccion" onclick="transmitirSinProteccion()"> Enviar sin protección</button>
+                        <button class="boton-con-hamming" onclick="transmitirConHamming()"> Enviar con Hamming</button>
+                    </div>
+                    <button class="boton-limpiar-chat" onclick="limpiarChatVisual()">Limpiar chat</button>
+                    <div id="visual-mensaje-error" class="visual-error" style="display:none;"></div>
+                </div>
+
+                <!-- ESCENARIO: DOS CELULARES + CANAL -->
+                <div class="escenario-transmision">
+
+                    <!-- PANEL INFO EMISOR -->
+                    <div class="panel-info-transmision" id="panel-emisor-info">
+                        <div class="panel-info-vacio">
+                            <span class="panel-vacio-icono">📤</span>
+                            <span class="panel-vacio-texto">Envía un mensaje para ver el proceso de codificación</span>
+                        </div>
+                    </div>
+
+                    <!-- CELULAR EMISOR -->
+                    <div class="celular-contenedor">
+                        <div class="celular-cuerpo">
+                            <div class="celular-notch"></div>
+                            <div class="celular-barra-estado">
+                                <span>9:41</span>
+                                <div class="estado-iconos">
+                                    <span class="icono-estado">▲▲▲</span>
+                                    <span class="icono-estado">WiFi</span>
+                                    <span class="icono-estado">■</span>
+                                </div>
+                            </div>
+                            <div class="celular-cabecera-chat">
+                                <div class="chat-avatar"></div>
+                                <span>Emisor</span>
+                            </div>
+                            <div class="celular-pantalla" id="chat-emisor"></div>
+                            <div class="celular-barra-inferior"><div class="linea-home"></div></div>
+                        </div>
+                        <div class="celular-etiqueta">📱 Emisor</div>
+                    </div>
+
+                    <!-- CANAL DE TRANSMISIÓN -->
+                    <div class="canal-transmision" id="canal-transmision">
+                        <div class="canal-titulo">Canal</div>
+                        <div class="ondas-contenedor" id="ondas-contenedor">
+                            <div class="onda-wifi"></div>
+                            <div class="onda-wifi"></div>
+                            <div class="onda-wifi"></div>
+                        </div>
+                        <div class="canal-icono" id="canal-icono"></div>
+                    </div>
+
+                    <!-- CELULAR RECEPTOR -->
+                    <div class="celular-contenedor">
+                        <div class="celular-cuerpo">
+                            <div class="celular-notch"></div>
+                            <div class="celular-barra-estado">
+                                <span>9:41</span>
+                                <div class="estado-iconos">
+                                    <span class="icono-estado">▲▲▲</span>
+                                    <span class="icono-estado">WiFi</span>
+                                    <span class="icono-estado">■</span>
+                                </div>
+                            </div>
+                            <div class="celular-cabecera-chat">
+                                <div class="chat-avatar"></div>
+                                <span>Receptor</span>
+                            </div>
+                            <div class="celular-pantalla" id="chat-receptor"></div>
+                            <div class="celular-barra-inferior"><div class="linea-home"></div></div>
+                        </div>
+                        <div class="celular-etiqueta">📱 Receptor</div>
+                    </div>
+
+                    <!-- PANEL INFO RECEPTOR -->
+                    <div class="panel-info-transmision" id="panel-receptor-info">
+                        <div class="panel-info-vacio">
+                            <span class="panel-vacio-icono">📥</span>
+                            <span class="panel-vacio-texto">Aquí verás el resultado al recibir el mensaje</span>
+                        </div>
+                    </div>
+
+                </div><!-- /escenario-transmision -->
+
+            </section>
+
             <!-- PASO 0: ENTRADA DE DATOS -->
             <section class="seccion-paso" id="seccion-entrada">
                 <div class="numero-paso">01</div>
